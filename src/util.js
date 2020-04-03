@@ -1,8 +1,8 @@
-export function appendHtml(html, attr) {
+export function appendHtml({html,parent=document.body,...attr}) {
     var div = document.createElement("DIV");
-    if (attr) for (let k of Object.keys(attr))
-        div.setAttribute(k, attr[k])
     div.insertAdjacentHTML('afterbegin', html);
-    document.body.appendChild(div)
+    for (let [k,v] of attr)
+      div.setAttribute(k, v)
+    parent.appendChild(div)
     return div
 }
