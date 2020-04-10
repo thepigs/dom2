@@ -19,6 +19,12 @@ const _gun = `<svg width="20px" height="20px">
     <circle cx="10" cy="10" r="10" stroke="#770" strokeWidth="4" fill="#d00" />
 </svg>
 `
+const _projectile = `<svg height="10" width="10">
+<polygon points="0,0 10,0 5,10" style="fill:lime;stroke:purple;stroke-width:1" />
+</svg>
+`
+
+
 export class Player extends Sprite {
     constructor() {
         super(_player)
@@ -28,8 +34,14 @@ export class Player extends Sprite {
 export class Gun extends Sprite {
     constructor(parent) {
         super(_gun,parent)
+        this.move({x:0,y:35})
     }
 }
 
+export class Projectile extends Sprite {
+    constructor(parent) {
+        super(_projectile,parent)
+    }
+}
 
 

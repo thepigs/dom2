@@ -1,4 +1,4 @@
-import { Player,Gun } from './player.js'
+import { Player,Gun,Projectile } from './player.js'
 const DELTA = 10
 const player  = new Player()
 const gun = new Gun(player)
@@ -51,8 +51,12 @@ class inertia  extends interpolator {
 
 const player_velocity = new inertia(0,0.2)
 
+function fire(){
+  const projectile = new Projectile()
+}
+
 function handleKeyDown(e) {
-  switch (e.key) {
+  switch (e.code) {
     case 'ArrowRight':
       player_velocity.x=DELTA
       break
@@ -65,7 +69,10 @@ function handleKeyDown(e) {
     case 'ArrowDown':
       player_velocity.y=DELTA
       break
+    case 'Space':
+      fire()
   }
+//  console.log(e)
 }
 
 function handleKeyUp(e) {

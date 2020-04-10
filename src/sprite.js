@@ -30,7 +30,7 @@ export class Sprite {
             this.x=m.x;
         if (m.dy)
             this.y+=m.dy;
-        else if (m.dy)
+        else if (m.y)
             this.y = m.y;
         this.el.style.left = this.x+'px'
         this.el.style.top = this.y+'px'
@@ -38,6 +38,8 @@ export class Sprite {
     center(){
         return {x:this.x+this.el.offsetWidth/2,y:this.y+this.el.offsetHeight/2}
     } 
-
+    bounds(){
+        return this.el.getBoundingClientRect()
+    }
 }
 
