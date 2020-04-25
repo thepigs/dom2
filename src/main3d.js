@@ -1,82 +1,112 @@
-var scene = new THREE.Scene();
-var camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
+import * as THREE from './three.module.js';
+import { Player,Projectile } from './player3d.js'
+import { inertia, rot_inertia } from './interpolator.js'
+import { Map } from './map.js'
+import * as World from './world.js'
 
-var renderer = new THREE.WebGLRenderer();
-renderer.setSize( window.innerWidth, window.innerHeight );
-document.body.appendChild( renderer.domElement );
+World.init()
+let player = new Player(World.scene3d)
+let map = new Map(World.scene2d)
 
-var geometry = new THREE.BoxGeometry();
-var material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
-var cube = new THREE.Mesh( geometry, material );
-scene.add( cube );
+  const player_velocity = new inertia(0,0.002)
+  const player_rot = new rot_inertia(0,0.1)
 
-camera.position.z = 5;
-
-console.log()
-var l0 = new THREE.Vector3(0,0,0)
-
-var l1 = new THREE.Vector4()
-
-renderer.getViewport(l1)
-
-
-function screenXY(obj){
-
-    var vector = obj.clone();
-    var windowWidth = window.innerWidth;
-    // var minWidth = 1280;
-  
-    // if(windowWidth < minWidth) {
-    //   windowWidth = minWidth;
-    // }
-  
-    var widthHalf = (windowWidth/2);
-    var heightHalf = (window.innerHeight/2);
-  
-    vector.project(camera);
-  
-    vector.x = ( vector.x * widthHalf ) + widthHalf;
-    vector.y = - ( vector.y * heightHalf ) + heightHalf;
-    vector.z = 0;
-  
-    return vector;
-  
-  };
-
-  let  mouse={x:0,y:0}
+  let projectile
+  let up = new THREE.Vector3(0,0,1)
 
   function animate() {
-    
+    var a = World.mouseAngle(player.obj.position)
+    player_rot.tr=-a
+    player.obj.setRotationFromAxisAngle(up,player_rot.r)
+    player_velocity.tick()
+    player_rot.tick()
+    player_velocity.worldTranslate(player.obj)
+    World.bgTexture.offset.x=player.obj.position.x/20
+    World.bgTexture.offset.y=player.obj.position.y/20
+    if (projectile)
+      projectile.obj.translateY(0.1)    
+    World.render()
+
     requestAnimationFrame( animate );
-
-//    cube.rotation.x += 0.01;
-  //  cube.rotation.y += 0.01;
-
-    //cube.position.y -= 0.01;
-
-    var pos = screenXY(cube.position);
-    
-    let d =Math.atan((mouse.y-pos.y)/(mouse.x-pos.x));
-    var v = new THREE.Vector3(0,0,1)
-
-    cube.setRotationFromAxisAngle(v,-d)
-
-    renderer.render( scene, camera );
-
 
 }
 animate();
 
+
+function fire(){
+  projectile = new Projectile(scene)
+  let v = new THREE.Vector3()
+  player.obj.children[0].getWorldPosition(v)
+  projectile.obj.position.copy(v)
+  projectile.obj.rotation.copy(player.obj.rotation)
+  projectile.obj.translateY(0.2)
+   var light=new THREE.SpotLight( 0xff0000,1)
+  // light.distance=6
+
+  // var dir = new THREE.Vector3()
+  // player.obj.getWorldDirection(dir)
+
+  // let tgt = new THREE.Object3D()
+  // tgt.translateOnAxis(dir,0.5)
+
+   projectile.obj.add(light);
+  // projectile.obj.add(tgt);
+  // light.target=tgt;
+  // light.distance=1
+  // console.log('here')
+// let h=new THREE.SpotLightHelper(light)
+// scene.add(h)
+
+}
+const DELTA=0.1
+
+function handleKeyPress(e) {
+
+}
+
+function handleKeyDown(e) {
+  switch (e.code) {
+    case 'ArrowRight':
+      player_velocity.x=DELTA
+      break
+    case 'ArrowLeft':
+      player_velocity.x=-DELTA
+      break
+    case 'ArrowUp':
+      player_velocity.y=DELTA
+      break
+    case 'ArrowDown':
+      player_velocity.y=-DELTA
+      break
+  }
+//  console.log(e)
+}
+
+function handleKeyUp(e) {
+  switch (e.code) {
+    case 'ArrowRight':
+    case 'ArrowLeft':
+      player_velocity.x=0
+      break
+    case 'ArrowUp':
+    case 'ArrowDown':
+      player_velocity.y=0
+      break
+    case 'Space':
+      fire()
+      break
+  }
+}
+
+
+
 function handleMouseMove(e){
   mouse.x=e.clientX
   mouse.y=e.clientY
-
-
-
 }
-// document.addEventListener('keydown', handleKeyDown, true)
-// document.addEventListener('keyup', handleKeyUp, true)
-document.addEventListener('mousemove', handleMouseMove, true)
+document.addEventListener('keypress', handleKeyPress, true)
+document.addEventListener('keydown', handleKeyDown, true)
+document.addEventListener('keyup', handleKeyUp, true)
 
 
 

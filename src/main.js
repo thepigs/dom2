@@ -4,51 +4,6 @@ const player  = new Player()
 const gun = new Gun(player)
 
 
-class interpolator {
-
-  constructor(value, accel) {
-    this.value = value
-    this.target = [...value]
-    this.signum = []
-    this.accel = accel
-  }
-
-  set_target(idx,value) {
-    this.target[idx] = value;
-    this.signum[idx] = Math.sign(this.target[idx] - this.value[idx])
-  }
-
-  tick() {
-
-    for (let i = 0; i < this.target.length; i++) {
-      if (this.value[i] != this.target[i]) {
-        this.value[i] += this.signum[i] * this.accel;
-        if (Math.sign(this.target[i]-this.value[i]) != this.signum[i])
-          this.value[i] = this.target[i]
-      }
-    }
-  }
-}
-
-class inertia  extends interpolator {
-  constructor(max_speed, inertia){
-    super([0,0],inertia)
-
-  }
-
-  set x(x){
-    this.set_target(0,x)
-  }
-  set y(y){
-    this.set_target(1,y)
-  }
-
-  get velocity() { 
-    return { dx:this.value[0], dy:this.value[1] }
-  }
-
-}
-
 const player_velocity = new inertia(0,0.2)
 
 function fire(){
@@ -94,6 +49,47 @@ function handleMouseMove(e){
   mouse.x=e.clientX
   mouse.y=e.clientY
 }
+
+const player_velocity = new inertia(0,0.2)
+
+function fire(){
+  const projectile = new Projectile()
+}
+
+function handleKeyDown(e) {
+  switch (e.code) {
+    case 'ArrowRight':
+      player_velocity.x=DELTA
+      break
+    case 'ArrowLeft':
+      player_velocity.x=-DELTA
+      break
+    case 'ArrowUp':
+      player_velocity.y=-DELTA
+      break
+    case 'ArrowDown':
+      player_velocity.y=DELTA
+      break
+    case 'Space':
+      fire()
+  }
+//  console.log(e)
+}
+
+function handleKeyUp(e) {
+  switch (e.key) {
+    case 'ArrowRight':
+    case 'ArrowLeft':
+      player_velocity.x=0
+      break
+    case 'ArrowUp':
+    case 'ArrowDown':
+      player_velocity.y=0
+      break
+  }
+}
+
+
 document.addEventListener('keydown', handleKeyDown, true)
 document.addEventListener('keyup', handleKeyUp, true)
 document.addEventListener('mousemove', handleMouseMove, true)
@@ -102,7 +98,6 @@ document.addEventListener('mousemove', handleMouseMove, true)
 var start = null;
 
 var last = 0
-const DEG2RAD = 360/(2*Math.PI)
 
 function step(timestamp) {
   const diff = timestamp - last
