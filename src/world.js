@@ -104,21 +104,26 @@ export function mouseAngle(vec3) {
   return d
 }
 
-
+export function alignRight(obj,offset=0){
+  obj.position.x=camera2d.right-obj.geometry.boundingBox.max.x-offset
+}
+export function alignTop(obj,offset=0){
+  obj.position.y=camera2d.top-obj.geometry.boundingBox.max.y-offset
+}
 function handleMouseMove(e) {
   mouse.x = e.clientX
   mouse.y = e.clientY
 }
 
-let world = new EventDispatcher()
+export let events = new THREE.EventDispatcher()
 
 function onWindowResize() {
 
-  camera3d.aspect = window.innerWidth / window.innerHeight;
-  camera3d.updateProjectionMatrix();
+  
   renderer.setSize(window.innerWidth, window.innerHeight);
+  initCamera()
   initBackground()
-
+  events.dispatchEvent({type:'resize',aspect:camera3d.aspect})
 }
 
 export function render() {
